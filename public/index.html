@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#d87521">
+  <title>La casa del rincón guatemalteco</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <section id="login-panel" class="login-screen" hidden>
+    <form id="login-form" class="login-box">
+      <div class="login-brand"><span><b>La casa del rincón guatemalteco</b></span></div>
+      <h1>Ingreso al sistema</h1>
+      <p>Control de ventas, inventario y administración</p>
+      <label>Usuario<input id="login-username" name="username" autocomplete="username" required autofocus></label>
+      <label>Contraseña<input id="login-password" name="password" type="password" autocomplete="current-password" required></label>
+      <div id="login-error" class="error-message" hidden></div>
+      <button class="button primary wide" type="submit">Ingresar</button>
+      <small class="muted">Acceso validado con la base de datos del sistema.</small>
+    </form>
+  </section>
+
+  <div id="app-shell" class="app-shell" hidden>
+    <header class="topbar">
+      <a class="top-brand" href="#" data-view="home">La casa del rincón guatemalteco</a>
+      <nav class="module-bar" aria-label="Módulos principales">
+        <button data-view="home">Inicio</button>
+        <button data-view="clients">Clientes</button>
+        <button data-view="suppliers">Proveedores</button>
+        <button data-view="products">Productos</button>
+        <button data-view="pos">Punto de venta</button>
+        <button data-view="invoices">Facturas</button>
+        <button data-view="returns">Devoluciones</button>
+        <button data-view="cash">Caja</button>
+        <button data-view="purchases">Compras</button>
+        <button data-view="promotions">Promociones</button>
+        <button data-view="scan">Leer QR</button>
+        <button data-view="reports">Reportes</button>
+      </nav>
+      <div class="top-account"><span class="warning-mark">▲</span><span id="user-name">Administrador</span><button id="logout-button" title="Cerrar sesión">Cerrar sesión</button></div>
+    </header>
+    <div class="workspace">
+      <main class="main-content">
+        <div class="page-heading"><div><span class="crumb">La casa del rincón guatemalteco / <b id="page-module">Operaciones diarias</b></span><h1 id="page-title">Resumen</h1></div><div class="heading-user"><span id="today-label"></span><span class="user-square">AD</span></div></div>
+        <div id="notice" class="notice" hidden></div>
+        <section id="view-home" class="view"></section>
+        <section id="view-clients" class="view" hidden></section>
+        <section id="view-suppliers" class="view" hidden></section>
+        <section id="view-products" class="view" hidden></section>
+        <section id="view-promotions" class="view" hidden></section>
+        <section id="view-cash" class="view" hidden></section>
+        <section id="view-pos" class="view" hidden></section>
+        <section id="view-invoices" class="view" hidden></section>
+        <section id="view-returns" class="view" hidden></section>
+        <section id="view-purchases" class="view" hidden></section>
+        <section id="view-reports" class="view" hidden></section>
+        <section id="view-scan" class="view" hidden></section>
+        <footer class="page-footer">La casa del rincón guatemalteco <span>·</span> Sistema de control de ventas e inventario</footer>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="edit-dialog" class="dialog"><form id="record-form"><div class="dialog-heading"><h2 id="dialog-title">Registro</h2><button type="button" class="plain-close" data-close-dialog>×</button></div><div id="form-fields" class="form-grid"></div><div class="dialog-actions"><button type="button" class="button" data-close-dialog>Cancelar</button><button type="submit" class="button primary">Guardar</button></div></form></dialog>
+  <dialog id="invoice-dialog" class="dialog invoice-dialog"><div id="invoice-content"></div><div class="dialog-actions no-print"><button class="button" data-close-invoice>Cerrar</button><button class="button primary" id="print-invoice">Imprimir factura</button></div></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

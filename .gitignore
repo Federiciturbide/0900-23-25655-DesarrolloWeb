@@ -1,0 +1,16 @@
+# Base operativa: contiene sesiones y datos editables del negocio.
+data/*.sqlite3
+
+# Archivos generados localmente.
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+
+# Editor / entorno.
+.vscode/
+.idea/
+
+data/credenciales_iniciales.txt
+

@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" modified="2026-10-25T00:00:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram name="DDD - Contextos delimitados" id="ddd-contexts">
+    <mxGraphModel dx="1400" dy="850" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1460" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="DDD · Contextos delimitados y modelo del dominio" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=25;fontColor=#333333;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="35" y="20" width="1380" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="Núcleo de consumo masivo: venta minorista, existencia y promoción por familia" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=15;fontColor=#777777;" vertex="1" parent="1">
+          <mxGeometry x="38" y="62" width="1380" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="sales" value="NÚCLEO · VENTAS&lt;br&gt;&lt;b&gt;Sale (agregado raíz)&lt;/b&gt;&lt;br&gt;&lt;br&gt;SaleLine · Invoice QR&lt;br&gt;precio · promociones · cobro&lt;br&gt;lealtad y vales" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6d1;strokeColor=#bd6118;strokeWidth=2;fontColor=#4c3422;fontFamily=Arial;fontSize=15;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="510" y="230" width="390" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="catalog" value="CATÁLOGO Y CONTACTOS&lt;br&gt;&lt;b&gt;Product · PriceHistory&lt;/b&gt;&lt;br&gt;&lt;br&gt;Client · Supplier&lt;br&gt;SKU, familia, precios vigentes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ef;strokeColor=#d87521;strokeWidth=2;fontColor=#4c3a2e;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="70" y="210" width="325" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="inventory" value="INVENTARIO&lt;br&gt;&lt;b&gt;Purchase · Return&lt;/b&gt;&lt;br&gt;&lt;br&gt;Entrada de compra y stock&lt;br&gt;Retorno dañado/vencido&lt;br&gt;no vendible" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e9eef3;strokeColor=#526777;strokeWidth=2;fontColor=#263643;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="95" y="520" width="325" height="185" as="geometry" />
+        </mxCell>
+        <mxCell id="cash" value="CAJA&lt;br&gt;&lt;b&gt;CashRegister&lt;/b&gt;&lt;br&gt;&lt;br&gt;Fondo inicial · ingresos&lt;br&gt;efectivo esperado · corte" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff7ef;strokeColor=#d87521;strokeWidth=2;fontColor=#4c3a2e;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="525" y="560" width="350" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="identity" value="IDENTIDAD&lt;br&gt;&lt;b&gt;User · Session&lt;/b&gt;&lt;br&gt;&lt;br&gt;Acceso validado en SQLite" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f2fb;strokeColor=#4876a1;strokeWidth=2;fontColor=#26435d;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="185" width="300" height="135" as="geometry" />
+        </mxCell>
+        <mxCell id="report" value="INFORMES&lt;br&gt;&lt;b&gt;Consultas de lectura&lt;/b&gt;&lt;br&gt;&lt;br&gt;Ventas · cierres · devoluciones&lt;br&gt;clientes · compras" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#888888;strokeWidth=2;fontColor=#333333;fontFamily=Arial;fontSize=13;align=center;verticalAlign=middle;spacing=8;" vertex="1" parent="1">
+          <mxGeometry x="1035" y="510" width="330" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="Cliente y productos" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d87521;endArrow=block;endFill=1;fontSize=11;fontColor=#444444;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="catalog" target="sales">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="Venta descuenta existencias" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#526777;endArrow=block;endFill=1;fontSize=11;fontColor=#444444;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="sales" target="inventory">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="Compra repone existencias" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#526777;endArrow=block;endFill=1;fontSize=11;fontColor=#444444;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="inventory" target="sales">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="Forma de pago / movimiento" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#d87521;endArrow=block;endFill=1;fontSize=11;fontColor=#444444;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="sales" target="cash">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="Usuario responsable" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#4876a1;endArrow=block;endFill=1;fontSize=11;fontColor=#444444;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="identity" target="sales">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="Datos de venta y factura" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#888888;endArrow=block;endFill=1;fontSize=11;fontColor=#444444;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="sales" target="report">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" value="Compras y devoluciones" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#888888;endArrow=block;endFill=1;fontSize=11;fontColor=#444444;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="inventory" target="report">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="Reglas: precios e inventario se conservan por producto; una venta incluye sus líneas y factura; una devolución no supera la cantidad pendiente y no repone artículos dañados/vencidos; un vale solo se consume una vez." style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="70" y="755" width="1290" height="55" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
