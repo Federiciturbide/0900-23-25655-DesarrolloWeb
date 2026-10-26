@@ -173,19 +173,6 @@ class AppHandler(SimpleHTTPRequestHandler):
         if not user:
             return
         try:
-            if path == "/api/dashboard":
-                with persistence_port.connect(DB_PATH) as connection:
-                    register = self.register_summary(connection)
-                    counts = {key: connection.execute(sql).fetchone()[0] for key,sql in {
-                        "clients":"SELECT COUNT(*) FROM clients WHERE active=1",
-                        "suppliers":"SELECT COUNT(*) FROM suppliers WHERE active=1",
-                        "products":"SELECT COUNT(*) FROM products WHERE active=1",
-                        "low_stock":"SELECT COUNT(*) FROM products WHERE active=1 AND stock<=5",
-                        "today_sales":"SELECT COUNT(*) FROM sales WHERE date(created_at)=date('now','localtime') AND status='COMPLETADA'",
-                        "today_total":"SELECT COALESCE(SUM(total),0) FROM sales WHERE date(created_at)=date('now','localtime') AND status='COMPLETADA'",
-                        "today_returns":"SELECT COUNT(*) FROM returns WHERE date(created_at)=date('now','localtime')",
-                    }.items()}
-                return self.send_json({**counts,"cash_register":register})
             if path == "/api/clients":
                 with persistence_port.connect(DB_PATH) as c:
                     return self.send_json(safe_rows(c.execute("SELECT * FROM clients ORDER BY active DESC,name COLLATE NOCASE").fetchall()))
@@ -553,7 +540,12 @@ class AppHandler(SimpleHTTPRequestHandler):
             promotion_text="; ".join(promo_types) if promo_types else "Sin promoción"
             qr_promotion=next((p for p in applied if p["type"]!="points"),applied[0] if applied else None)
             promo_code=qr_promotion["code"] if qr_promotion else "SIN-PROMO"
-            promo_type=qr_promotion["type"] if qr_promotion else "sin-promocion"
+            qr_type_labels={
+                "discount":"Descuento de producto", "free_product":"Producto gratuito",
+                "gift_voucher":"Vale de regalo", "half_second":"Segundo producto a mitad de precio",
+                "wholesale":"Compra por mayoreo", "points":"Puntos por producto",
+            }
+            promo_type=qr_type_labels.get(qr_promotion["type"],"Sin promoción") if qr_promotion else "Sin promoción"
             qr_payload=f"RINCON|{invoice_number}|{promo_code}|{promo_type}"
             c.execute("INSERT INTO invoices(sale_id,number,issued_at,qr_payload,promotion_text) VALUES (?,?,?,?,?)",(sale_id,invoice_number,current,qr_payload,promotion_text))
         self.audit(user_id,"venta y factura","invoice",sale_id,f"{invoice_number}; total Q{total:.2f}")

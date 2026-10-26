@@ -1,0 +1,4 @@
+jsQR 1.4.0
+Copyright Cosmo Wolfe and Jefff Nelson
+Source: https://github.com/cozmo/jsQR
+License: Apache License 2.0. See LICENSE-jsQR.txt.

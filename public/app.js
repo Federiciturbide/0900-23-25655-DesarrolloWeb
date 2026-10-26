@@ -1,7 +1,7 @@
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-const state = { view: 'home', user: null, catalog: '', catalogRows: [], cart: [], products: [], clients: [], suppliers: [], pos: {clientId:'',payment:'Efectivo',cash:'',voucher:'',usePoints:false,customer_name:'',customer_nit:'CF',customer_address:''}, purchaseLines: [], camera: null, invoiceSearch: '' };
-const titles = {home:['Operaciones diarias','Resumen'],cash:['Punto de Venta','Caja'],pos:['Punto de Venta','Despacho y cobro'],invoices:['Ventas','Facturación'],returns:['Ventas','Devoluciones'],purchases:['Compras','Compras a proveedores'],products:['Almacén','Productos y precios'],clients:['Contactos','Clientes'],suppliers:['Contactos','Proveedores'],promotions:['Configuración','Promociones'],scan:['Punto de Venta','Lectura de código QR'],reports:['Informes','Reportes']};
+const state = { view: 'cash', user: null, catalog: '', catalogRows: [], cart: [], products: [], clients: [], suppliers: [], pos: {clientId:'',payment:'Efectivo',cash:'',voucher:'',usePoints:false,customer_name:'',customer_nit:'CF',customer_address:''}, purchaseLines: [], camera: null, invoiceSearch: '' };
+const titles = {cash:['Caja','Apertura y cierre'],pos:['Punto de Venta','Despacho y cobro'],invoices:['Ventas','Facturación'],returns:['Ventas','Devoluciones'],purchases:['Compras','Compras a proveedores'],products:['Almacén','Productos y precios'],clients:['Contactos','Clientes'],suppliers:['Contactos','Proveedores'],promotions:['Configuración','Promociones'],scan:['Punto de Venta','Lectura de código QR'],reports:['Informes','Reportes']};
 const labelTypes = {discount:'Descuento de producto',free_product:'Producto gratuito',gift_voucher:'Vale de regalo',half_second:'Segundo a mitad de precio',wholesale:'Precio de mayoreo',points:'Puntos por producto'};
 const money = value => 'Q ' + Number(value || 0).toLocaleString('es-GT',{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -30,19 +30,18 @@ function showApp(user) {
   state.user = user; $('#login-panel').hidden = true; $('#app-shell').hidden = false;
   $('#user-name').textContent = user.display_name || user.username;
   $('#today-label').textContent = new Date().toLocaleDateString('es-GT',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  go('home');
+  go('cash');
 }
 function startLogin() { $('#login-panel').hidden = false; $('#app-shell').hidden = true; $('#login-username').focus(); }
 async function go(view) {
   stopCamera();
-  state.view = view in titles ? view : 'home';
+  state.view = view in titles ? view : 'cash';
   $$('.view').forEach(el => el.hidden = true);
   const page = $('#view-' + state.view); page.hidden = false;
   const [module,title] = titles[state.view]; $('#page-module').textContent = module; $('#page-title').textContent = title;
   $$('.module-bar button').forEach(button => button.classList.toggle('active',button.dataset.view === state.view));
   notice('');
   try {
-    if (state.view === 'home') await renderHome();
     if (['clients','suppliers','products','promotions'].includes(state.view)) await renderCatalog(state.view);
     if (state.view === 'cash') await renderCash();
     if (state.view === 'pos') await renderPOS();
@@ -60,31 +59,6 @@ function panel(title,content,extra='') {
 function stat(title,value,foot) {
   return '<div class="stat"><div class="stat-title">' + title + '</div><div class="stat-value">' + value + '</div><div class="stat-foot">' + foot + '</div></div>';
 }
-async function renderHome() {
-  const d = await api('/api/dashboard');
-  const register = d.cash_register;
-  const regText = register.is_open ? 'Abierta desde ' + prettyDate(register.opened_at) + ' · Fondo ' + money(register.opening_amount) : 'No hay caja abierta';
-  $('#view-home').innerHTML =
-    '<div class="stats-grid">' +
-    stat('Ventas de hoy',money(d.today_total),d.today_sales + ' operaciones') +
-    stat('Devoluciones de hoy',d.today_returns,'Productos dañados o vencidos') +
-    stat('Productos activos',d.products,d.low_stock + ' con existencia baja') +
-    stat('Clientes activos',d.clients,d.suppliers + ' proveedores registrados') +
-    '</div><div class="home-columns">' +
-    panel('Estado de caja','<div class="status-line"><b>' + esc(regText) + '</b></div>' +
-      (register.is_open ? '<p>Ventas en efectivo: ' + money(register.cash_sales) + ' · Reembolsos en efectivo: ' + money(register.cash_returns) + '</p><p>Efectivo esperado: <b>' + money(register.expected_cash) + '</b></p>' : '<p>Abre una sesión para comenzar a vender.</p>') +
-      '<button class="button primary" data-view="cash">Ir a caja</button> <button class="button" data-view="pos">Abrir punto de venta</button>') +
-    panel('Accesos del sistema','<div class="quick-list">' +
-      '<button data-view="pos"><b>Punto de venta</b><span>Despachar, aplicar promociones y cobrar</span></button>' +
-      '<button data-view="invoices"><b>Facturación</b><span>Consultar e imprimir comprobantes con QR</span></button>' +
-      '<button data-view="purchases"><b>Compras</b><span>Ingresar mercadería y actualizar existencias</span></button>' +
-      '<button data-view="reports"><b>Reportes</b><span>Cortes, ventas, devoluciones y compras</span></button>' +
-      '<button data-view="clients"><b>Clientes</b><span>Contactos y puntos acumulados</span></button>' +
-      '<button data-view="promotions"><b>Promociones</b><span>Descuentos, vales, mayoreo y puntos</span></button>' +
-      '</div>') +
-    '</div><div class="callout">Sistema de inventario y ventas con almacenamiento local en SQLite. La información del negocio queda registrada en la base de datos.</div>';
-}
-
 const catalogConfig = {
   clients:{endpoint:'clients',title:'Clientes',singular:'cliente',search:'Buscar por código, nombre, NIT o teléfono',columns:[['code','Código'],['name','Nombre'],['nit','NIT'],['phone','Teléfono'],['email','Correo'],['loyalty_points','Puntos'],['active','Estado']]},
   suppliers:{endpoint:'suppliers',title:'Proveedores',singular:'proveedor',search:'Buscar por código, empresa o contacto',columns:[['code','Código'],['business_name','Nombre comercial'],['contact_name','Contacto'],['nit','NIT'],['phone','Teléfono'],['active','Estado']]},
@@ -217,7 +191,7 @@ function invoiceMarkup(inv) {
     '<div class="invoice-customer"><div><b>Cliente:</b> ' + esc(inv.customer_name) + '</div><div><b>NIT:</b> ' + esc(inv.customer_nit || 'CF') + '</div><div><b>Dirección:</b> ' + esc(inv.customer_address || '—') + '</div><div><b>Atendió:</b> ' + esc(inv.cashier) + '</div></div>' +
     '<div class="table-wrap"><table class="invoice-table"><thead><tr><th>SKU</th><th>Descripción</th><th>Cantidad</th><th>Precio unitario</th><th>Descuento</th><th>Total</th></tr></thead><tbody>' + inv.lines.map(l=>'<tr><td>' + esc(l.sku) + '</td><td>' + esc(l.product_name) + (l.is_free ? ' <span class="tag orange">Gratis</span>' : '') + '</td><td>' + num(l.quantity) + '</td><td>' + money(l.unit_price) + '</td><td>' + money(l.discount_amount) + '</td><td>' + money(l.line_total) + '</td></tr>').join('') + '</tbody></table></div>' +
     '<div class="invoice-totals"><div><span>Subtotal</span><b>' + money(inv.subtotal) + '</b></div><div><span>Descuentos</span><b>− ' + money(inv.discount_total) + '</b></div><div class="grand"><span>Total</span><b>' + money(inv.total) + '</b></div><div><span>Forma de pago</span><b>' + esc(inv.payment_method) + '</b></div>' + (inv.payment_method==='Efectivo'?'<div><span>Efectivo recibido</span><b>' + money(inv.amount_received) + '</b></div><div><span>Cambio</span><b>' + money(inv.change_due) + '</b></div>':'') + '</div>' +
-    '<div class="invoice-bottom"><div><b>Promociones:</b> ' + esc(inv.promotion_text || 'Sin promoción') + (inv.issued_voucher ? '<br><b>Vale generado:</b> ' + esc(inv.issued_voucher.code) + ' (' + money(inv.issued_voucher.amount) + ')' : '') + '<br><small>Escanea para consultar la promoción vinculada.</small></div>' + qr + '</div></article>';
+    '<div class="invoice-bottom"><div><b>Promociones:</b> ' + esc(inv.promotion_text || 'Sin promoción') + (inv.issued_voucher ? '<br><b>Vale generado:</b> ' + esc(inv.issued_voucher.code) + ' (' + money(inv.issued_voucher.amount) + ')' : '') + '<br><small>Escanea con tu celular: el QR indica el tipo de promoción.</small></div>' + qr + '</div></article>';
 }
 async function openInvoice(key) {
   const inv = await api('/api/invoices/' + encodeURIComponent(key));
@@ -295,15 +269,57 @@ function stopCamera() {
   const start=$('#start-camera'),stop=$('#stop-camera'); if(start)start.disabled=false;if(stop)stop.disabled=true;
 }
 async function startCamera() {
-  if(!('BarcodeDetector' in window)){toast('Este navegador no incluye lectura QR por cámara. Usa el campo manual o la cámara del teléfono.');return;}
+  if(!navigator.mediaDevices?.getUserMedia){toast('Este navegador no permite acceder a la cámara. Abre la app en localhost o pega el contenido del QR.');return;}
+  if(!('BarcodeDetector' in window) && typeof window.jsQR!=='function'){toast('No se cargó el lector QR local. Recarga la página e inténtalo de nuevo.');return;}
   try{
-    state.camera=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+    state.camera=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
     const video=$('#camera-video'); video.srcObject=state.camera; await video.play();
-    $('#start-camera').disabled=true; $('#stop-camera').disabled=false; $('#camera-note').textContent='Apunta la cámara al código QR de una factura.';
-    const detector=new BarcodeDetector({formats:['qr_code']});
-    const scan=async()=>{if(!state.camera)return;try{const codes=await detector.detect(video);if(codes.length){stopCamera();$('#scan-form [name=payload]').value=codes[0].rawValue;await lookupQR(codes[0].rawValue);return;}}catch(_){}requestAnimationFrame(scan);};
+    $('#start-camera').disabled=true; $('#stop-camera').disabled=false;
+    $('#camera-note').textContent='Cámara activa. Centra el código QR de una factura frente a la cámara.';
+    let detector=null;
+    if('BarcodeDetector' in window){try{detector=new BarcodeDetector({formats:['qr_code']});}catch(_){detector=null;}}
+    const canvas=document.createElement('canvas');
+    const context=canvas.getContext('2d',{willReadFrequently:true});
+    let lastScan=0;
+    const scan=async()=>{
+      if(!state.camera)return;
+      try{
+        if(video.readyState>=HTMLMediaElement.HAVE_CURRENT_DATA && performance.now()-lastScan>180){
+          lastScan=performance.now();
+          let rawValue='';
+          if(detector){
+            try{const codes=await detector.detect(video);if(codes.length)rawValue=codes[0].rawValue;}
+            catch(_){detector=null;}
+          }
+          if(!rawValue && !detector && typeof window.jsQR==='function'){
+            const scale=Math.min(1,1280/video.videoWidth);
+            canvas.width=Math.max(1,Math.round(video.videoWidth*scale));
+            canvas.height=Math.max(1,Math.round(video.videoHeight*scale));
+            context.drawImage(video,0,0,canvas.width,canvas.height);
+            const frame=context.getImageData(0,0,canvas.width,canvas.height);
+            const decoded=window.jsQR(frame.data,frame.width,frame.height,{inversionAttempts:'attemptBoth'});
+            if(decoded)rawValue=decoded.data;
+          }
+          if(rawValue){
+            stopCamera();
+            $('#scan-form [name=payload]').value=rawValue;
+            await lookupQR(rawValue);
+            return;
+          }
+        }
+      }catch(error){
+        stopCamera();
+        toast('No se pudo leer el QR: '+error.message);
+        return;
+      }
+      if(state.camera)setTimeout(scan,100);
+    };
     scan();
-  }catch(error){toast('No se pudo abrir la cámara: '+error.message);}
+  }catch(error){
+    stopCamera();
+    $('#camera-note').textContent='Permite el acceso a la cámara en el navegador y vuelve a intentarlo.';
+    toast('No se pudo abrir la cámara: '+error.message);
+  }
 }
 
 $('#login-form').addEventListener('submit',async event=>{
